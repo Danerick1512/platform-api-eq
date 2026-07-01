@@ -16,6 +16,7 @@ CREDENTIALS_DIR.mkdir(exist_ok=True)
 TEMPLATE_FILE = CREDENTIALS_DIR / ".env.example"
 if not TEMPLATE_FILE.exists():
     TEMPLATE_FILE = CREDENTIALS_DIR / "layout_example.env.example"
+DEFAULT_CREDENTIALS_FILE = CREDENTIALS_DIR / "c13200175.env"
 
 print("STARTING APP")
 load_projects(app)
@@ -45,8 +46,12 @@ def _load_template_env() -> dict[str, str]:
 
 
 _template_env = _load_template_env()
-_mongo_uri = os.getenv("MONGO_URI") or _template_env.get("MONGO_URI")
-_mongo_database = os.getenv("MONGO_DATABASE") or _template_env.get("MONGO_DATABASE", "test")
+_default_env = {}
+if DEFAULT_CREDENTIALS_FILE.exists():
+    _default_env = _parse_env(DEFAULT_CREDENTIALS_FILE.read_text())
+
+_mongo_uri = os.getenv("MONGO_URI") or _default_env.get("MONGO_URI") or _template_env.get("MONGO_URI")
+_mongo_database = os.getenv("MONGO_DATABASE") or _default_env.get("MONGO_DATABASE") or _template_env.get("MONGO_DATABASE", "test")
 if not _mongo_uri:
     raise RuntimeError(
         "Missing MONGO_URI. Set MONGO_URI in the environment or provide it in credentials/.env.example."
