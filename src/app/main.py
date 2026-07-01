@@ -12,7 +12,9 @@ app = FastAPI(title="Platform API", version="1.0.0")
 
 CREDENTIALS_DIR = Path(__file__).resolve().parents[2] / "credentials"
 CREDENTIALS_DIR.mkdir(exist_ok=True)
-TEMPLATE_FILE = CREDENTIALS_DIR / "layout_example.env"
+TEMPLATE_FILE = CREDENTIALS_DIR / ".env.example"
+if not TEMPLATE_FILE.exists():
+    TEMPLATE_FILE = CREDENTIALS_DIR / "layout_example.env.example"
 
 print("STARTING APP")
 load_projects(app)
@@ -30,9 +32,28 @@ def _parse_env(text: str) -> dict[str, str]:
     return entries
 
 
-_template_env = _parse_env(TEMPLATE_FILE.read_text()) if TEMPLATE_FILE.exists() else {}
-_mongo_client = AsyncIOMotorClient(_template_env.get("MONGO_URI", ""))
-_mongo_db = _mongo_client[_template_env.get("MONGO_DATABASE", "test")]
+def _load_template_env() -> dict[str, str]:
+    if not TEMPLATE_FILE.exists():
+        raise RuntimeError(
+            "Missing credentials template. Create credentials/.env.example or "
+            "credentials/layout_example.env.example with the expected keys."
+        )
+
+    template_env = _parse_env(TEMPLATE_FILE.read_text())
+    required_keys = {"MONGO_URI", "MONGO_DATABASE"}
+    missing = required_keys - set(template_env)
+    if missing:
+        raise RuntimeError(
+            f"Credentials template {TEMPLATE_FILE.name} is missing required key(s): "
+            + ", ".join(sorted(missing))
+        )
+
+    return template_env
+
+
+_template_env = _load_template_env()
+_mongo_client = AsyncIOMotorClient(_template_env["MONGO_URI"])
+_mongo_db = _mongo_client[_template_env["MONGO_DATABASE"]]
 _students_col = _mongo_db["mobile_student_endpoint"]
 
 

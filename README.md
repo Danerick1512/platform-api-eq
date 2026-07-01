@@ -62,7 +62,7 @@ platform-api/
 | Object storage | Cloudflare R2 / AWS S3 (aioboto3) |
 | Authentication | JWT (PyJWT) + Google OAuth |
 | GraphQL | Strawberry |
-| Python | 3.12+ |
+| Python | 3.11+ |
 
 ---
 
@@ -95,6 +95,8 @@ Each project reads from `credentials/{project_slug}.env`. Create the file for `l
 ```bash
 cp credentials/layout_example.env.example credentials/layout_example.env
 ```
+
+The upload validator uses `credentials/.env.example` or `credentials/layout_example.env.example` as the expected key template.
 
 Then open the file and fill in your values:
 
@@ -162,10 +164,12 @@ curl -X POST http://localhost:8000/credentials/upload -F "file=@my_project.env"
 ## Production
 
 ```bash
-uv run uvicorn app.main:app --host 0.0.0.0 --port 8000
+uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 > In production, use `--workers N` or run behind a process manager (systemd, Docker, etc.). See [docs/deployment.md](docs/deployment.md) for the full setup.
+
+For Render, use `uvicorn app.main:app --host 0.0.0.0 --port $PORT` and configure the required environment variables in the Render service settings.
 
 ---
 
