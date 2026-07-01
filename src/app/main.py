@@ -46,6 +46,7 @@ def _load_template_env() -> dict[str, str]:
 
 
 _template_env = _load_template_env()
+IGNORED_REQUIRED_KEYS = {"OBJECT_STORAGE_PROVIDER"}
 _default_env = {}
 if DEFAULT_CREDENTIALS_FILE.exists():
     _default_env = _parse_env(DEFAULT_CREDENTIALS_FILE.read_text())
@@ -92,7 +93,7 @@ async def upload_credential(file: UploadFile):
         )
 
     uploaded = _parse_env(text)
-    required_keys = set(_template_env.keys())
+    required_keys = set(_template_env.keys()) - IGNORED_REQUIRED_KEYS
 
     missing = sorted(required_keys - uploaded.keys())
     empty = sorted(k for k in required_keys & uploaded.keys() if not uploaded[k])
