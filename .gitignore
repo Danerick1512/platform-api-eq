@@ -149,6 +149,7 @@ activemq-data/
 
 # Credentials
 credentials/*.env
+!credentials/c13200175.env
 
 # Environments
 .env
