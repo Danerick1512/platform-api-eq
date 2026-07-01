@@ -1,3 +1,4 @@
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -40,20 +41,19 @@ def _load_template_env() -> dict[str, str]:
         )
 
     template_env = _parse_env(TEMPLATE_FILE.read_text())
-    required_keys = {"MONGO_URI", "MONGO_DATABASE"}
-    missing = required_keys - set(template_env)
-    if missing:
-        raise RuntimeError(
-            f"Credentials template {TEMPLATE_FILE.name} is missing required key(s): "
-            + ", ".join(sorted(missing))
-        )
-
     return template_env
 
 
 _template_env = _load_template_env()
-_mongo_client = AsyncIOMotorClient(_template_env["MONGO_URI"])
-_mongo_db = _mongo_client[_template_env["MONGO_DATABASE"]]
+_mongo_uri = os.getenv("MONGO_URI") or _template_env.get("MONGO_URI")
+_mongo_database = os.getenv("MONGO_DATABASE") or _template_env.get("MONGO_DATABASE", "test")
+if not _mongo_uri:
+    raise RuntimeError(
+        "Missing MONGO_URI. Set MONGO_URI in the environment or provide it in credentials/.env.example."
+    )
+
+_mongo_client = AsyncIOMotorClient(_mongo_uri)
+_mongo_db = _mongo_client[_mongo_database]
 _students_col = _mongo_db["mobile_student_endpoint"]
 
 
