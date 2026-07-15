@@ -1,13 +1,12 @@
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class GeoEvent(BaseModel):
     id: int
-    user_id: Optional[UUID] = None
+    user_id: Optional[str] = None
     latitude: float
     longitude: float
     altitude: Optional[float] = None

@@ -1,6 +1,5 @@
 from datetime import datetime
 from typing import Optional
-from uuid import UUID
 
 from pydantic import BaseModel, EmailStr
 
@@ -75,7 +74,7 @@ class FileResponse(BaseModel):
 
 
 class GeoEventCreate(BaseModel):
-    user_id: Optional[UUID] = None
+    user_id: Optional[str] = None
     latitude: float
     longitude: float
     altitude: Optional[float] = None
@@ -92,7 +91,7 @@ class GeoEventCreate(BaseModel):
 
 class GeoEventResponse(BaseModel):
     id: int
-    user_id: Optional[UUID] = None
+    user_id: Optional[str] = None
     latitude: float
     longitude: float
     altitude: Optional[float] = None
